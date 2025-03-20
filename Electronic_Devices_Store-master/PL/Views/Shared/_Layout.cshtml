@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PL.styles.css" asp-append-version="true" />
+
 </head>
 <body>
     <header>
@@ -29,6 +30,16 @@
                 </div>
             </div>
         </nav>
+
+        <!-- Cart Icon (Top Right) -->
+        <!-- Cart Icon (Top Right) -->
+        <div class="cart-container">
+            <a asp-controller="Cart" asp-action="Index" class="cart-link">
+                <img src="https://static.vecteezy.com/system/resources/previews/010/835/736/non_2x/cart-icon-logo-vector.jpg"
+                     alt="Cart" class="cart-icon">
+                @* <span class="cart-count">@ViewBag.CartItemCount</span> *@
+            </a>
+        </div>
     </header>
     <div class="container">
         <main role="main" class="pb-3">

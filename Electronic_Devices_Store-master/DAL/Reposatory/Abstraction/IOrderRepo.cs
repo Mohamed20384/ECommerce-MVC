@@ -9,10 +9,10 @@ namespace DAL.Reposatory.Abstraction
 {
     public interface IOrderRepo
     {
-        Task<Order> GetbyId(int id);
-        Task<List<Order>> GetAll();
-        Task CreateNew(Order product);
-        Task EditProduct(int id, Order newProduct);
-        Task Delete(int id);
+        void PlaceOrder(Order order);
+        List<Order> GetOrdersByUser(string userId);
+        Order GetOrderById(int orderId);
+        void UpdateOrder(Order order);
+        void DeleteOrder(int orderId);
     }
 }

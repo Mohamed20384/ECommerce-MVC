@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace BLL.Services.Absraction
 {
-    internal interface IOrderServices
+    public interface IOrderService
     {
-        Task<OrderDTO> GetbyId(int id);
-        Task<List<OrderDTO>> GetAll();
-        Task CreateNew(OrderDTO order);
-        Task EditOrder(int id, OrderDTO newOrder);
-        Task Delete(int id);
+        void PlaceOrder(string userId);
+        List<OrderDTO> GetOrdersByUser(string userId);
+        OrderDTO GetOrderById(int orderId);
+        void UpdateOrder(OrderDTO orderDTO);
+        void DeleteOrder(int orderId);
     }
 }

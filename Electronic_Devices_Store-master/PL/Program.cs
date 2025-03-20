@@ -4,6 +4,11 @@ using DAL.Reposatory.Abstraction;
 using DAL.Reposatory.Implementation;
 using BLL.Services.Absraction;
 using BLL.Services.Implementation;
+using BLL.Services.Abstraction; // Make sure this exists
+using BLL.Services;
+
+
+
 
 namespace PL
 {
@@ -15,15 +20,25 @@ namespace PL
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            
+
             builder.Services.AddDbContext<ApplicationDbContext>(optionBuilder =>
             {
                 optionBuilder.UseSqlServer(builder.Configuration.GetConnectionString("projectConnectionString"));
             });
+
+            // Register dependencies
             builder.Services.AddScoped<IProductRepo, ProductRepo>();
             builder.Services.AddScoped<IProductServices, ProductServices>();
             builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
             builder.Services.AddScoped<ICategoryServices, CategoryServices>();
+
+            // Add Cart services and repository
+            builder.Services.AddScoped<ICardRepo, CardRepo>();
+            builder.Services.AddScoped<ICardServices, CardServices>();
+
+            // Add Order services and repository
+            builder.Services.AddScoped<IOrderRepo, OrderRepository>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
 
             var app = builder.Build();
 
@@ -31,7 +46,6 @@ namespace PL
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 

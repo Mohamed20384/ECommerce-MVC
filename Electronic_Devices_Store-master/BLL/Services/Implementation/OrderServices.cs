@@ -11,102 +11,94 @@ using System.Threading.Tasks;
 
 namespace BLL.Services.Implementation
 {
-    public class OrderServices : IOrderServices
+    public class OrderService : IOrderService
     {
         private readonly IOrderRepo _orderRepo;
+        private readonly ICardRepo _cardRepo;
 
-        public OrderServices(IOrderRepo orderRepo)
+        public OrderService(IOrderRepo orderRepo, ICardRepo cardRepo)
         {
             _orderRepo = orderRepo;
+            _cardRepo = cardRepo;
         }
 
-        public async Task CreateNew(OrderDTO order)
+        public void PlaceOrder(string userId)
         {
-            var orderEntity = new Order
+            var cartItems = _cardRepo.GetCartItems(userId).ToList();
+            if (!cartItems.Any()) return;
+
+            var order = new Order
             {
-                UserId = order.UserId,
-                OrderDate = order.OrderDate,
-                TotalAmount = order.TotalAmount,
-                OrderItems = order.OrderItems.Select(item => new Product 
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Price = item.Price,
-                    Description = item.Description,
-                    CategoryId = item.CategoryId,
-                    ImageUrl = item.ImageUrl
-                }).ToList()  
+                UserId = userId,
+                TotalAmount = cartItems.Sum(c => c.Product.Price * c.Quantity),
+                OrderItems = cartItems.Select(c => c.Product).ToList(),
+                OrderDate = DateTime.Now
             };
 
-            await _orderRepo.CreateNew(orderEntity);
+            _orderRepo.PlaceOrder(order);
         }
 
-        public async Task Delete(int id)
+        public List<OrderDTO> GetOrdersByUser(string userId)
         {
-            await _orderRepo.Delete(id);
-        }
+            var orders = _orderRepo.GetOrdersByUser(userId);
 
-        public async Task EditOrder(int id, OrderDTO newOrder)
-        {
-            var orderEntity = new Order
+            return orders.Select(o => new OrderDTO
             {
-                UserId = newOrder.UserId,
-                OrderDate = newOrder.OrderDate,
-                TotalAmount = newOrder.TotalAmount,
-                OrderItems = newOrder.OrderItems.Select(item => new Product  
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Price = item.Price,
-                    Description = item.Description,
-                    CategoryId = item.CategoryId,
-                    ImageUrl = item.ImageUrl
-                }).ToList()  
-            };
-
-            await _orderRepo.EditProduct(id, orderEntity);
-        }
-
-        public async Task<List<OrderDTO>> GetAll()
-        {
-            var listEntity = await _orderRepo.GetAll();
-            var listDTO = listEntity.Select(o => new OrderDTO
-            {
+                Id = o.Id,
                 UserId = o.UserId,
                 OrderDate = o.OrderDate,
                 TotalAmount = o.TotalAmount,
-                OrderItems = o.OrderItems.Select(item => new Product  
+                OrderItems = o.OrderItems.Select(p => new ProductDTO
                 {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Price = item.Price,
-                    Description = item.Description,
-                    CategoryId = item.CategoryId,
-                    ImageUrl = item.ImageUrl
+                    Id = p.Id,
+                    Name = p.Name,
+                    ImageUrl = p.ImageUrl,
+                    Price = p.Price
                 }).ToList()
             }).ToList();
-            return listDTO;
         }
 
-        public async Task<OrderDTO> GetbyId(int id)
+        public OrderDTO GetOrderById(int orderId)
         {
-            var orderEntity = await _orderRepo.GetbyId(id);
-            var orderDTO = new OrderDTO
+            var order = _orderRepo.GetOrderById(orderId);
+            if (order == null) return null;
+
+            return new OrderDTO
             {
-                UserId = orderEntity.UserId,
-                OrderDate = orderEntity.OrderDate,
-                TotalAmount = orderEntity.TotalAmount,
-                OrderItems = orderEntity.OrderItems.Select(item => new Product
+                Id = order.Id,
+                UserId = order.UserId,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                OrderItems = order.OrderItems.Select(p => new ProductDTO
                 {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Price = item.Price,
-                    Description = item.Description,
-                    CategoryId = item.CategoryId,
-                    ImageUrl = item.ImageUrl
+                    Id = p.Id,
+                    Name = p.Name,
+                    ImageUrl = p.ImageUrl,
+                    Price = p.Price
                 }).ToList()
             };
-            return orderDTO;
+        }
+
+        public void UpdateOrder(OrderDTO orderDTO)
+        {
+            var order = _orderRepo.GetOrderById(orderDTO.Id);
+            if (order != null)
+            {
+                order.TotalAmount = orderDTO.TotalAmount;
+                order.OrderItems = orderDTO.OrderItems.Select(p => new Product
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    ImageUrl = p.ImageUrl,
+                    Price = p.Price
+                }).ToList();
+                _orderRepo.UpdateOrder(order);
+            }
+        }
+
+        public void DeleteOrder(int orderId)
+        {
+            _orderRepo.DeleteOrder(orderId);
         }
     }
 

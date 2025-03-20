@@ -19,9 +19,7 @@
         </select>
     </div>
     <input type="text" id="searchBar" class="search-input" placeholder="Search products..." onkeyup="filterProducts()">
-    <button class="search-button">
-        🔍
-    </button>
+    <button class="search-button">🔍</button>
 </div>
 
 <!-- Product Listings -->
@@ -35,21 +33,24 @@
             {
                 @foreach (var product in Model.ProductsByCategory[category.Id])
                 {
-                    <div class="product-card" data-name="@product.Name" data-category="@category.Id">
-                        <span class="badge">Sponsored</span>
-                        <img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
-                        <h3 class="product-title">@product.Name</h3>
-                        <p class="product-description">
-                            @(product.Description.Length > 100 ? product.Description.Substring(0, 100) + "..." : product.Description)
-                        </p>
-                        <div class="rating">
-                            ⭐⭐⭐⭐☆ <span class="review-count">(120)</span>
+                    <!-- 🔹 Make Product Clickable -->
+                    <a asp-controller="Product" asp-action="ProductPage" asp-route-id="@product.Id" class="product-card-link">
+                        <div class="product-card" data-name="@product.Name" data-category="@category.Id">
+                            <span class="badge">Sponsored</span>
+                            <img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
+                            <h3 class="product-title">@product.Name</h3>
+                            <p class="product-description">
+                                @(product.Description.Length > 100 ? product.Description.Substring(0, 100) + "..." : product.Description)
+                            </p>
+                            <div class="rating">
+                                ⭐⭐⭐⭐☆ <span class="review-count">(120)</span>
+                            </div>
+                            <div class="price-container">
+                                <span class="price">$@product.Price</span>
+                                <span class="discount">List Price: <del>$@(product.Price * (decimal)1.2)</del></span>
+                            </div>
                         </div>
-                        <div class="price-container">
-                            <span class="price">$@product.Price</span>
-                            <span class="discount">List Price: <del>$@(product.Price * (decimal)1.2)</del></span>
-                        </div>
-                    </div>
+                    </a>
                 }
             }
             else

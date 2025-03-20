@@ -9,58 +9,51 @@ using System.Threading.Tasks;
 
 namespace DAL.Reposatory.Implementation
 {
-    public class OrderRepo : IOrderRepo
+    public class OrderRepository : IOrderRepo
     {
         private readonly ApplicationDbContext _context;
 
-        public OrderRepo(ApplicationDbContext context)
+        public OrderRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<Order> GetbyId(int id)
+        public void PlaceOrder(Order order)
         {
-            return await _context.Orders.Include(o => o.User)
-                                        .Include(o => o.OrderItems)
-                                        .FirstOrDefaultAsync(o => o.Id == id);
+            _context.Orders.Add(order);
+            _context.SaveChanges();
         }
 
-        public async Task<List<Order>> GetAll()
+        public List<Order> GetOrdersByUser(string userId)
         {
-            return await _context.Orders.Include(o => o.User)
-                                        .Include(o => o.OrderItems)
-                                        .ToListAsync();
+            return _context.Orders
+                           .Where(o => o.UserId == userId)
+                           .Include(o => o.OrderItems)
+                           .ToList();
         }
 
-        public async Task CreateNew(Order order)
+        public Order GetOrderById(int orderId)
         {
-            await _context.Orders.AddAsync(order);
-            await _context.SaveChangesAsync();
+            return _context.Orders
+                           .Include(o => o.OrderItems)
+                           .FirstOrDefault(o => o.Id == orderId);
         }
 
-        public async Task EditProduct(int id, Order newOrder)
+        public void UpdateOrder(Order order)
         {
-            var existingOrder = await _context.Orders.FindAsync(id);
-            if (existingOrder != null)
-            {
-                existingOrder.UserId = newOrder.UserId;
-                existingOrder.OrderDate = newOrder.OrderDate;
-                existingOrder.TotalAmount = newOrder.TotalAmount;
-                existingOrder.OrderItems = newOrder.OrderItems;
-
-                _context.Orders.Update(existingOrder);
-                await _context.SaveChangesAsync();
-            }
+            _context.Orders.Update(order);
+            _context.SaveChanges();
         }
 
-        public async Task Delete(int id)
+        public void DeleteOrder(int orderId)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = _context.Orders.Find(orderId);
             if (order != null)
             {
                 _context.Orders.Remove(order);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
         }
     }
+
 }
